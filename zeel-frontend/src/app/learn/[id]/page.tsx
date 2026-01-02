@@ -367,13 +367,7 @@ export default function ModuleViewerPage() {
                         <div className="pt-12 w-full">
                             <button
                                 onClick={handleSubmit}
-                                disabled={!isComplete}
-                                className={cn(
-                                    "w-full py-4 rounded-xl flex items-center justify-center gap-3 font-bold text-lg transition-all",
-                                    isComplete
-                                        ? "bg-success text-white hover:opacity-90 active:scale-[0.98]"
-                                        : "bg-secondary text-muted-foreground cursor-not-allowed"
-                                )}
+                                className="w-full py-4 rounded-xl flex items-center justify-center gap-3 font-bold text-lg bg-primary text-white hover:opacity-90 active:scale-[0.98] transition-all"
                             >
                                 Submit Quiz
                             </button>
