@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { Shield, Globe } from "lucide-react";
+import { Shield, Globe, LogOut, User as UserIcon } from "lucide-react";
 import { useState } from "react";
 import SOSModal from "./SOSModal";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function Navbar() {
     const [isSOSOpen, setIsSOSOpen] = useState(false);
+    const { user, profile, signOut } = useAuth();
 
     return (
         <>
@@ -35,30 +37,54 @@ export default function Navbar() {
                                 >
                                     Learn
                                 </Link>
-                                <Link
-                                    href="/admin"
-                                    className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] hover:text-primary transition-colors"
-                                >
-                                    Admin
-                                </Link>
+                                {profile?.role === 'admin' && (
+                                    <Link
+                                        href="/admin"
+                                        className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] hover:text-primary transition-colors"
+                                    >
+                                        Admin
+                                    </Link>
+                                )}
                             </div>
                         </div>
 
                         {/* Right Side: Auth & SOS */}
                         <div className="flex items-center gap-6">
                             <div className="flex items-center gap-4 mr-2">
-                                <Link
-                                    href="/login"
-                                    className="text-xs font-black text-primary uppercase tracking-[0.2em] hover:text-primary/70 transition-colors"
-                                >
-                                    Login
-                                </Link>
-                                <Link
-                                    href="/register"
-                                    className="text-xs font-black text-primary uppercase tracking-[0.2em] hover:text-primary/70 transition-colors"
-                                >
-                                    Register
-                                </Link>
+                                {user ? (
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex flex-col items-end">
+                                            <span className="text-[10px] font-black text-primary uppercase tracking-wider leading-none">
+                                                {profile?.full_name || user.email}
+                                            </span>
+                                            <span className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+                                                {profile?.role || 'User'}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => signOut()}
+                                            className="p-2 rounded-lg hover:bg-secondary/50 text-muted-foreground hover:text-rose-500 transition-all"
+                                            title="Sign Out"
+                                        >
+                                            <LogOut className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <Link
+                                            href="/login"
+                                            className="text-xs font-black text-primary uppercase tracking-[0.2em] hover:text-primary/70 transition-colors"
+                                        >
+                                            Login
+                                        </Link>
+                                        <Link
+                                            href="/register"
+                                            className="text-xs font-black text-primary uppercase tracking-[0.2em] hover:text-primary/70 transition-colors"
+                                        >
+                                            Register
+                                        </Link>
+                                    </>
+                                )}
                             </div>
 
                             <button

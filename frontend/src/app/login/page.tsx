@@ -2,9 +2,39 @@
 
 import { motion } from "framer-motion";
 import { Shield, ArrowRight, Mail, Lock } from "lucide-react";
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (signInError) throw signInError;
+
+            router.push("/dashboard");
+        } catch (err: any) {
+            setError(err.message || "Failed to sign in");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-white flex flex-col items-center pt-32 pb-20 px-6 font-sans">
             <motion.div
@@ -24,14 +54,22 @@ export default function LoginPage() {
 
                 {/* Card */}
                 <div className="bg-white border-2 border-secondary rounded-4xl p-8 shadow-sm">
-                    <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+                    <form className="space-y-5" onSubmit={handleLogin}>
+                        {error && (
+                            <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-xs font-bold text-rose-500 uppercase tracking-tight">
+                                {error}
+                            </div>
+                        )}
                         <div className="space-y-1.5">
                             <label className="text-[10px] font-black text-primary uppercase tracking-widest ml-1">Email</label>
                             <div className="relative group">
                                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                 <input
                                     type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
                                     placeholder="Enter your email"
+                                    required
                                     className="w-full bg-secondary/30 border-2 border-transparent focus:border-primary/10 focus:bg-white rounded-xl py-3.5 pl-11 pr-4 text-sm font-bold text-primary outline-none transition-all placeholder:text-muted-foreground/40"
                                 />
                             </div>
@@ -45,17 +83,21 @@ export default function LoginPage() {
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                                 <input
                                     type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
+                                    required
                                     className="w-full bg-secondary/30 border-2 border-transparent focus:border-primary/10 focus:bg-white rounded-xl py-3.5 pl-11 pr-4 text-sm font-bold text-primary outline-none transition-all placeholder:text-muted-foreground/40"
                                 />
                             </div>
                         </div>
 
                         <button
-                            className="w-full bg-primary text-white rounded-xl py-4 text-xs font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/10 hover:bg-primary/95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group mt-2"
+                            disabled={loading}
+                            className="w-full bg-primary text-white rounded-xl py-4 text-xs font-black uppercase tracking-[0.2em] shadow-lg shadow-primary/10 hover:bg-primary/95 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 transition-all flex items-center justify-center gap-2 group mt-2"
                         >
-                            Sign In
-                            <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                            {loading ? "Signing In..." : "Sign In"}
+                            {!loading && <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />}
                         </button>
                     </form>
 

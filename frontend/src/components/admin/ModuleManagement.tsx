@@ -2,6 +2,7 @@
 
 import { Plus, Trash2, Video, BookOpen, HelpCircle, Save, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface QuizQuestion {
     id: number;
@@ -48,7 +49,7 @@ export default function ModuleManagement() {
         setQuiz(newQuiz);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const moduleData = {
             title,
             description,
@@ -57,8 +58,38 @@ export default function ModuleManagement() {
             points: points.filter(p => p.trim() !== ""),
             quiz: quiz.filter(q => q.question.trim() !== "")
         };
-        console.log("Saving Module:", moduleData);
-        alert("Module configuration saved successfully! (Check console for data)");
+
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                alert("You must be logged in as an admin to save.");
+                return;
+            }
+
+            const response = await fetch('http://localhost:5000/api/v1/content/full-module', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify(moduleData)
+            });
+
+            if (response.ok) {
+                alert("Full Module (Hazard + Content + Quiz) created successfully!");
+                // Reset form
+                setTitle("");
+                setDescription("");
+                setVideoUrl("");
+                setPoints([""]);
+            } else {
+                const error = await response.json();
+                alert(`Failed to save: ${error.error}`);
+            }
+        } catch (err) {
+            console.error("Error saving module:", err);
+            alert("Network error. Is the backend running?");
+        }
     };
 
     return (

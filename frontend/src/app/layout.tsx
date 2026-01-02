@@ -13,6 +13,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { AuthProvider } from "@/lib/AuthContext";
+
 export const metadata: Metadata = {
   title: "AlertWise | Disaster Readiness & Response",
   description: "Experience the next level of emergency preparedness.",
@@ -28,10 +30,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground transition-colors duration-500`}
       >
-        <Navbar />
-        <main className="min-h-screen">
-          {children}
-        </main>
+        <AuthProvider>
+          <Navbar />
+          <main className="min-h-screen">
+            {children}
+          </main>
+        </AuthProvider>
       </body>
     </html>
   );

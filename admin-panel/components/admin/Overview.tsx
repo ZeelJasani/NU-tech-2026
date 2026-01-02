@@ -1,19 +1,56 @@
 "use client";
 
 import { AlertTriangle, Users, TrendingUp, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function Overview() {
-    const stats = [
-        { label: "Total Students", value: "245", trend: "+12 from last month", icon: Users },
-        { label: "Average Safety Score", value: "81", trend: "+5% from last week", icon: TrendingUp },
-        { label: "Drills This Month", value: "8", trend: "2 scheduled", icon: Calendar },
-        { label: "Active SOS Alerts", value: "1", trend: "Requires attention", icon: AlertTriangle, critical: true },
-    ];
+    const [stats, setStats] = useState([
+        { label: "Total Students", value: "0", trend: "Loading...", icon: Users },
+        { label: "Average Safety Score", value: "0", trend: "Loading...", icon: TrendingUp },
+        { label: "Drills This Month", value: "0", trend: "0 scheduled", icon: Calendar },
+        { label: "Active SOS Alerts", value: "0", trend: "No alerts", icon: AlertTriangle, critical: true },
+    ]);
 
-    const alerts = [
-        { name: "Alex Johnson", location: "Block A, Room 101", time: "2 minutes ago", status: "Active" },
-        { name: "Sarah Wilson", location: "Library, 2nd Floor", time: "1 hour ago", status: "Resolved" },
-    ];
+    const [alerts, setAlerts] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/v1/user/stats');
+                if (response.ok) {
+                    const data = await response.json();
+                    setStats([
+                        { label: "Total Students", value: data.totalStudents.toString(), trend: "+12 from last month", icon: Users },
+                        { label: "Average Safety Score", value: data.averageScore.toString(), trend: "+5% from last week", icon: TrendingUp },
+                        { label: "Drills This Month", value: data.drillsThisMonth.toString(), trend: "2 scheduled", icon: Calendar },
+                        { label: "Active SOS Alerts", value: data.activeAlerts.toString(), trend: data.activeAlerts > 0 ? "Requires attention" : "Everything clear", icon: AlertTriangle, critical: data.activeAlerts > 0 },
+                    ]);
+                }
+            } catch (err) {
+                console.error("Failed to fetch stats:", err);
+            }
+        };
+
+        const fetchAlerts = async () => {
+            try {
+                const response = await fetch('http://localhost:5000/api/v1/alerts');
+                if (response.ok) {
+                    const data = await response.json();
+                    setAlerts(data.map((a: any) => ({
+                        name: a.title,
+                        location: a.region || "Unknown",
+                        time: new Date(a.created_at).toLocaleTimeString(),
+                        status: a.active ? "Active" : "Resolved"
+                    })));
+                }
+            } catch (err) {
+                console.error("Failed to fetch alerts:", err);
+            }
+        };
+
+        fetchStats();
+        fetchAlerts();
+    }, []);
 
     return (
         <div className="space-y-10">

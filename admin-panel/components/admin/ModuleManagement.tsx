@@ -48,17 +48,38 @@ export default function ModuleManagement() {
         setQuiz(newQuiz);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const moduleData = {
             title,
             description,
             icon,
             videoUrl,
+            slug: title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''),
             points: points.filter(p => p.trim() !== ""),
             quiz: quiz.filter(q => q.question.trim() !== "")
         };
-        console.log("Saving Module:", moduleData);
-        alert("Module configuration saved successfully! (Check console for data)");
+
+        try {
+            const response = await fetch('http://localhost:5000/api/v1/hazards', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Note: In a real app, you'd include the session token here
+                    // 'Authorization': `Bearer ${session.access_token}`
+                },
+                body: JSON.stringify(moduleData)
+            });
+
+            if (response.ok) {
+                alert("Module configuration saved successfully to the backend!");
+            } else {
+                const error = await response.json();
+                alert(`Failed to save module: ${error.error}`);
+            }
+        } catch (err) {
+            console.error("Error saving module:", err);
+            alert("Network error occurred while saving the module.");
+        }
     };
 
     return (
@@ -232,8 +253,8 @@ export default function ModuleManagement() {
                                             <button
                                                 onClick={() => updateQuestion(qIdx, "correct", oIdx)}
                                                 className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all ${q.correct === oIdx
-                                                        ? "bg-amber-500 border-amber-500 text-white"
-                                                        : "border-slate-200 bg-white"
+                                                    ? "bg-amber-500 border-amber-500 text-white"
+                                                    : "border-slate-200 bg-white"
                                                     }`}
                                             >
                                                 {q.correct === oIdx && <div className="h-2 w-2 bg-white rounded-full" />}

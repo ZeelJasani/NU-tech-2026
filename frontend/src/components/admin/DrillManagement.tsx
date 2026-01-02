@@ -1,13 +1,80 @@
 "use client";
 
 import { Play, Settings, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function DrillManagement() {
-    const drills = [
-        { title: "Fire Evacuation", time: "Today 2:00 PM", status: "pending" },
-        { title: "Earthquake Response", time: "Tomorrow 10:00 AM", status: "scheduled" },
-        { title: "Medical Emergency", time: "Nov 25, 3:00 PM", status: "scheduled" },
-    ];
+    const [drills, setDrills] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchDrills = async () => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const response = await fetch('http://localhost:5000/api/v1/drills', {
+                headers: {
+                    'Authorization': `Bearer ${session?.access_token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setDrills(data.map((d: any) => ({
+                    title: d.title,
+                    time: new Date(d.scheduled_at).toLocaleString(),
+                    status: d.status
+                })));
+            }
+        } catch (err) {
+            console.error("Failed to fetch drills:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchDrills();
+
+        // Real-time updates for drills
+        const channel = supabase
+            .channel('public-drills-channel')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'drills' },
+                () => fetchDrills()
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
+
+    const handleStartDrill = async () => {
+        const title = prompt("Enter Drill Title:", "Surprise Fire Drill");
+        if (!title) return;
+
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const response = await fetch('http://localhost:5000/api/v1/drills', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session?.access_token}`
+                },
+                body: JSON.stringify({
+                    title,
+                    scheduled_at: new Date().toISOString(),
+                    status: 'pending'
+                })
+            });
+            if (response.ok) {
+                alert("Drill started and broadcasted!");
+                fetchDrills();
+            }
+        } catch (err) {
+            console.error("Failed to start drill:", err);
+        }
+    };
 
     return (
         <div className="space-y-8">
@@ -15,7 +82,10 @@ export default function DrillManagement() {
                 <div>
                     <h2 className="text-2xl font-bold text-slate-900">Drill Management</h2>
                 </div>
-                <button className="bg-[#003366] hover:bg-[#002244] text-white px-8 py-3.5 rounded-xl font-bold flex items-center gap-3 transition-all shadow-xl shadow-blue-900/10">
+                <button
+                    onClick={handleStartDrill}
+                    className="bg-[#003366] hover:bg-[#002244] text-white px-8 py-3.5 rounded-xl font-bold flex items-center gap-3 transition-all shadow-xl shadow-blue-900/10"
+                >
                     <Play className="h-5 w-5 fill-white" />
                     Start Emergency Drill
                 </button>

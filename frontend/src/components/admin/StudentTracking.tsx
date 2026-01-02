@@ -1,14 +1,41 @@
 "use client";
 
 import { Search, Download } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function StudentTracking() {
-    const students = [
-        { name: "Alex Johnson", class: "Grade 10", safetyScore: 78, completion: 65, badges: 12 },
-        { name: "Sarah Wilson", class: "Grade 10", safetyScore: 92, completion: 88, badges: 18 },
-        { name: "Mike Chen", class: "Grade 11", safetyScore: 84, completion: 71, badges: 15 },
-        { name: "Emma Davis", class: "Grade 9", safetyScore: 69, completion: 45, badges: 8 },
-    ];
+    const [students, setStudents] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                const response = await fetch('http://localhost:5000/api/v1/user/students', {
+                    headers: {
+                        'Authorization': `Bearer ${session?.access_token}`
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setStudents(data.map((s: any) => ({
+                        name: s.full_name || "Unknown User",
+                        class: s.region || "General",
+                        safetyScore: s.preparedness_score || 0,
+                        completion: 0, // Need to fetch from quiz_attempts
+                        badges: 0
+                    })));
+                }
+            } catch (err) {
+                console.error("Failed to fetch students:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStudents();
+    }, []);
 
     return (
         <div className="space-y-8">
@@ -51,7 +78,7 @@ export default function StudentTracking() {
                                 <td className="px-8 py-6 font-bold text-slate-800">{student.name}</td>
                                 <td className="px-8 py-6 text-slate-500 font-medium text-center">{student.class}</td>
                                 <td className={`px-8 py-6 font-black text-center ${student.safetyScore >= 85 ? 'text-emerald-500' :
-                                        student.safetyScore >= 75 ? 'text-orange-500' : 'text-rose-500'
+                                    student.safetyScore >= 75 ? 'text-orange-500' : 'text-rose-500'
                                     }`}>
                                     {student.safetyScore}
                                 </td>

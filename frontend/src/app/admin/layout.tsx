@@ -3,12 +3,36 @@
 import { Bell, Globe, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { Shield } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const { user, profile, loading, signOut } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!loading && (!user || profile?.role !== 'admin')) {
+            router.push('/login');
+        }
+    }, [user, profile, loading, router]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-white">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
+
+    if (!user || profile?.role !== 'admin') {
+        return null; // Will redirect via useEffect
+    }
+
     return (
         <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans">
             {/* Admin Header */}
@@ -19,8 +43,8 @@ export default function AdminLayout({
                             <Shield className="h-8 w-8 text-primary" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold tracking-tight text-primary leading-tight">DisasterEdu</h1>
-                            <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">From Awareness to Action</p>
+                            <h1 className="text-2xl font-bold tracking-tight text-primary leading-tight">AlertWise</h1>
+                            <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Admin Dashboard</p>
                         </div>
                     </Link>
                 </div>
@@ -40,13 +64,20 @@ export default function AdminLayout({
 
                     <div className="flex items-center gap-4 pl-4 border-l border-slate-200">
                         <div className="text-right hidden sm:block">
-                            <p className="text-sm font-bold text-slate-800">Mr. Suresh Kumar</p>
-                            <p className="text-xs font-medium text-slate-500">Teacher/Admin</p>
+                            <p className="text-sm font-bold text-slate-800">{profile?.full_name}</p>
+                            <p className="text-xs font-medium text-slate-500 uppercase tracking-tighter">{profile?.role}</p>
                         </div>
                         <div className="h-10 w-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden">
-                            <User className="h-6 w-6 text-slate-400" />
+                            {profile?.avatar_url ? (
+                                <img src={profile.avatar_url} alt="profile" className="w-full h-full object-cover" />
+                            ) : (
+                                <User className="h-6 w-6 text-slate-400" />
+                            )}
                         </div>
-                        <button className="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors">
+                        <button
+                            onClick={() => signOut()}
+                            className="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors"
+                        >
                             <LogOut className="h-5 w-5" />
                         </button>
                     </div>
