@@ -1,29 +1,91 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useRef } from "react";
 import {
-    ChevronLeft,
     Play,
     Pause,
     CheckCircle2,
-    ArrowRight,
     ArrowLeft,
     Shield,
     Video,
     BookOpen,
+    Trophy,
 } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+
+const quizData = [
+    {
+        id: 1,
+        question: "What is the first action you should take when you feel an earthquake?",
+        options: [
+            "Run outside immediately",
+            "Drop to your hands and knees",
+            "Stand in a doorway",
+            "Call for help"
+        ],
+        correct: 1,
+    },
+    {
+        id: 2,
+        question: "Where is the safest place to take cover during an earthquake indoors?",
+        options: [
+            "Near a window",
+            "Under a sturdy desk or table",
+            "In a doorway",
+            "Against a wall"
+        ],
+        correct: 1,
+    },
+    {
+        id: 3,
+        question: "If you are outdoors during an earthquake, you should:",
+        options: [
+            "Run into the nearest building",
+            "Lie flat on the ground",
+            "Move away from buildings and power lines",
+            "Climb a tree"
+        ],
+        correct: 2,
+    },
+];
 
 export default function ModuleViewerPage() {
     const params = useParams();
+    const router = useRouter();
     const id = params.id as string;
+    const quizRef = useRef<HTMLDivElement>(null);
+
+    const [answers, setAnswers] = useState<Record<number, number>>({});
+    const [showScoreModal, setShowScoreModal] = useState(false);
+    const [score, setScore] = useState(0);
 
     const moduleName = id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
+    const handleSelect = (questionId: number, optionIdx: number) => {
+        setAnswers({ ...answers, [questionId]: optionIdx });
+    };
+
+    const isComplete = Object.keys(answers).length === quizData.length;
+
+    const handleSubmit = () => {
+        let correctCount = 0;
+        quizData.forEach(q => {
+            if (answers[q.id] === q.correct) correctCount++;
+        });
+        const finalScore = Math.round((correctCount / quizData.length) * 100);
+        setScore(finalScore);
+        setShowScoreModal(true);
+    };
+
+    const scrollToQuiz = () => {
+        quizRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
     return (
-        <div className="pt-28 pb-12 min-h-screen bg-secondary/10 text-foreground transition-colors">
+        <div className="pt-28 pb-12 min-h-screen bg-secondary/10 text-foreground transition-colors overflow-x-hidden">
             <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
                 {/* Sub-header */}
@@ -47,7 +109,7 @@ export default function ModuleViewerPage() {
                     <div className="h-3 w-full bg-secondary rounded-full overflow-hidden">
                         <motion.div
                             initial={{ width: 0 }}
-                            animate={{ width: "16%" }}
+                            animate={{ width: isComplete ? "100%" : "16%" }}
                             className="h-full bg-primary"
                         />
                     </div>
@@ -79,14 +141,13 @@ export default function ModuleViewerPage() {
                     </div>
 
                     {/* Green Continue Button (Simplified) */}
-                    {/* Note: In image 4, it shows a "Continue to Quiz" button. I'll add a simplified version below */}
-                    <Link
-                        href="/quiz"
+                    <button
+                        onClick={scrollToQuiz}
                         className="w-full bg-success hover:bg-success/90 py-4 rounded-lg flex items-center justify-center gap-3 text-white font-black uppercase tracking-widest text-lg shadow-lg shadow-success/20 transition-all border-b-4 border-black/10 active:border-b-0 active:translate-y-1"
                     >
                         <CheckCircle2 className="h-6 w-6" />
-                        Continue to Quiz
-                    </Link>
+                        Go to Knowledge Check
+                    </button>
 
                     {/* Key Safety Points */}
                     <div className="w-full pt-4 space-y-6">
@@ -108,9 +169,121 @@ export default function ModuleViewerPage() {
                             ))}
                         </div>
                     </div>
+
+                    <div className="w-full border-t border-border mt-12 pt-12" ref={quizRef}>
+                        <div className="w-full mb-10">
+                            <h2 className="text-3xl font-black text-primary flex items-center gap-3">
+                                <BookOpen className="h-8 w-8" />
+                                Knowledge Check
+                            </h2>
+                            <p className="text-muted-foreground font-bold text-base mt-1">Answer the questions below to test your understanding. You need 70% to pass.</p>
+                        </div>
+
+                        {/* Questions List */}
+                        <div className="space-y-12 w-full">
+                            {quizData.map((q, qIdx) => (
+                                <div key={q.id} className="space-y-6">
+                                    <h3 className="text-xl font-bold text-primary">
+                                        {qIdx + 1}. {q.question}
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {q.options.map((option, oIdx) => (
+                                            <button
+                                                key={oIdx}
+                                                onClick={() => handleSelect(q.id, oIdx)}
+                                                className="w-full flex items-center gap-3 group text-left"
+                                            >
+                                                <div className={cn(
+                                                    "h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all shrink-0",
+                                                    answers[q.id] === oIdx
+                                                        ? "border-primary bg-primary"
+                                                        : "border-muted-foreground/30 group-hover:border-primary/50"
+                                                )}>
+                                                    {answers[q.id] === oIdx && <div className="h-2 w-2 rounded-full bg-white" />}
+                                                </div>
+                                                <span className={cn(
+                                                    "text-base font-medium transition-colors",
+                                                    answers[q.id] === oIdx ? "text-primary font-bold" : "text-muted-foreground group-hover:text-primary"
+                                                )}>
+                                                    {option}
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Submit Button */}
+                        <div className="pt-12 w-full">
+                            <button
+                                onClick={handleSubmit}
+                                disabled={!isComplete}
+                                className={cn(
+                                    "w-full py-4 rounded-lg flex items-center justify-center gap-3 font-black uppercase tracking-widest text-lg shadow-lg transition-all border-b-4",
+                                    isComplete
+                                        ? "bg-success text-white hover:bg-success/90 shadow-success/20 border-black/10 active:border-b-0 active:translate-y-1"
+                                        : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed shadow-none"
+                                )}
+                            >
+                                Submit Quiz
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
             </div>
+
+            {/* Score Modal */}
+            <AnimatePresence>
+                {showScoreModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl overflow-hidden relative"
+                        >
+                            <div className="flex flex-col items-center text-center space-y-6">
+                                <div className={cn(
+                                    "h-24 w-24 rounded-full flex items-center justify-center",
+                                    score >= 70 ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                                )}>
+                                    <Trophy className="h-12 w-12" />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <h2 className="text-3xl font-black text-primary uppercase tracking-tight">
+                                        {score >= 70 ? "Module Complete!" : "Keep Trying!"}
+                                    </h2>
+                                    <p className="text-muted-foreground font-bold">
+                                        {score >= 70
+                                            ? "Fantastic work! You have mastered the fundamentals of earthquake safety."
+                                            : "You're getting there! Review the safety points and try again."}
+                                    </p>
+                                </div>
+
+                                <div className="w-full bg-secondary/50 rounded-2xl py-6 flex flex-col items-center">
+                                    <span className="text-xs font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Your Score</span>
+                                    <span className={cn(
+                                        "text-6xl font-black tabular-nums",
+                                        score >= 70 ? "text-success" : "text-destructive"
+                                    )}>
+                                        {score}%
+                                    </span>
+                                </div>
+
+                                <button
+                                    onClick={() => router.push('/dashboard')}
+                                    className="w-full bg-primary text-white py-4 rounded-xl font-black uppercase tracking-widest text-sm shadow-xl shadow-primary/20 hover:bg-primary/95 transition-all"
+                                >
+                                    Return to Dashboard
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
