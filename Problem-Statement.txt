@@ -1,0 +1,28 @@
+Disaster Preparedness and Response Eduction System
+
+analysis my both markdown files and generate third markdown files with cover 
+1. Project Name
+2. Problem Statement
+3. Project Description
+4. Solution
+5. Technology Stack
+    - MERN Stack
+    - Supabase Auth
+    - Microservices Architecture (Optional)
+6. Architecture
+    - Frontend: React
+    - Backend: Node.js + Express.js
+    - Database: Supabase
+    - Authentication: Supabase Auth
+    - Real-time: Supabase Realtime
+    - Deployment: Vercel fro Frontend and Render for Backend 
+7. Database
+    - Supabase
+8. Authentication
+    - Supabase Auth
+9. Authorization
+    - Role-based access control
+10. Deployment
+    - Vercel for Frontend
+    - Render for Backend
+11. Future Work

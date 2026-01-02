@@ -1,19 +1,4 @@
-First, learning goals check: are you aiming more for a polished demo or a scalable architecture you can extend later?
-
-Good project names
-Some options:
-
-“ReadyRescue – Disaster Education & Alerts System”
-
-“SafeLearn – Disaster Preparedness Platform”
-
-“PreparedNow – Community Disaster Education System”
-
-“ResilientEd – Disaster Learning & Response Hub”
-
 “AlertWise – Disaster Readiness & Response”
-
-Pick one that fits the story you’ll tell judges.
 
 Detailed feature breakdown
 1. User roles and journeys
