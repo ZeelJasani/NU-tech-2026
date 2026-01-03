@@ -11,7 +11,7 @@ export default function DrillManagement() {
     const fetchDrills = async () => {
         try {
             const { data: { session } } = await supabase.auth.getSession();
-            const response = await fetch('http://localhost:5000/api/v1/drills', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/drills`, {
                 headers: {
                     'Authorization': `Bearer ${session?.access_token}`
                 }
@@ -55,7 +55,7 @@ export default function DrillManagement() {
 
         try {
             const { data: { session } } = await supabase.auth.getSession();
-            const response = await fetch('http://localhost:5000/api/v1/drills', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/drills`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

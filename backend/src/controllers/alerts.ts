@@ -25,7 +25,10 @@ export const getAlerts = async (req: Request, res: Response) => {
 
     const { data, error } = await query;
 
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+        console.error('[Alerts] Database error:', error);
+        return res.status(500).json({ error: error.message });
+    }
     res.json(data);
 };
 

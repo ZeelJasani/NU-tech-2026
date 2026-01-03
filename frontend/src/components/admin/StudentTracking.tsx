@@ -12,7 +12,7 @@ export default function StudentTracking() {
         const fetchStudents = async () => {
             try {
                 const { data: { session } } = await supabase.auth.getSession();
-                const response = await fetch('http://localhost:5000/api/v1/user/students', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/students`, {
                     headers: {
                         'Authorization': `Bearer ${session?.access_token}`
                     }

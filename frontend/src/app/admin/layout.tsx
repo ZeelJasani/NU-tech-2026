@@ -23,7 +23,7 @@ export default function AdminLayout({
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-white">
+            <div className="min-h-screen flex items-center justify-center bg-white" suppressHydrationWarning>
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
         );
@@ -34,7 +34,7 @@ export default function AdminLayout({
     }
 
     return (
-        <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans">
+        <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans" suppressHydrationWarning>
             {/* Admin Header */}
             <header className="bg-white border-b border-slate-200 h-20 px-8 flex items-center justify-between sticky top-0 z-50">
                 <div className="flex items-center gap-10">

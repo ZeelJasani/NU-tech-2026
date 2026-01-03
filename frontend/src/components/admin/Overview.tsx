@@ -18,7 +18,7 @@ export default function Overview() {
 
     const fetchStats = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/v1/user/stats', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/stats`, {
                 headers: {
                     'Authorization': `Bearer ${session?.access_token}`
                 }
@@ -39,7 +39,7 @@ export default function Overview() {
 
     const fetchAlerts = async () => {
         try {
-            const response = await fetch('http://localhost:5000/api/v1/alerts');
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/alerts`);
             if (response.ok) {
                 const data = await response.json();
                 setAlerts(data.map((a: any) => ({
@@ -84,7 +84,7 @@ export default function Overview() {
     const handleResolve = async (id: string, action: string) => {
         if (!session) return alert("Must be logged in to resolve alerts");
         try {
-            const response = await fetch(`http://localhost:5000/api/v1/alerts/${id}/deactivate`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/alerts/${id}/deactivate`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${session?.access_token}`,

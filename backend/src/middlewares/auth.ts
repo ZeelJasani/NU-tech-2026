@@ -13,12 +13,14 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
         const { data: { user }, error } = await supabase.auth.getUser(token);
 
         if (error || !user) {
+            console.error('[Auth] Verification failed:', error?.message || 'No user found');
             return res.status(401).json({ error: 'Invalid or expired session' });
         }
 
         req.user = user;
         next();
     } catch (err) {
+        console.error('[Auth] Unexpected error:', err);
         return res.status(500).json({ error: 'Auth service error' });
     }
 };
