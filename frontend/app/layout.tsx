@@ -1,5 +1,5 @@
-import { GeistSans } from 'geist/font/sans';
 import { GeistMono } from 'geist/font/mono';
+import { GeistSans } from 'geist/font/sans';
 import { Navbar } from "@/components/nav-bar";
 import { NavbarProvider } from "@/components/nav-mobile";
 import { ThemeProvider } from "@/components/theme-provider";

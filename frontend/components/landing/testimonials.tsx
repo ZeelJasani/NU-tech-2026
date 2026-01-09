@@ -7,87 +7,86 @@ import { Icons } from "../icons";
 const testimonials = [
 	{
 		name: "Sarah Johnson",
-		description: "This platform has transformed how we teach disaster readiness. The interactive quizzes and real-time alerts have made our community more prepared than ever before. The earthquake safety module alone has helped hundreds of families create effective emergency plans.",
+		description: "This platform changed how we teach disaster safety. The quizzes and alerts really help families stay prepared, especially for earthquakes.",
 		avatar: "https://randomuser.me/api/portraits/women/12.jpg",
 	},
 	{
 		name: "Dr. Michael Chen",
-		description: "As someone who has worked in disaster response for 15 years, I'm impressed by how comprehensive and accurate the information is. The wildfire preparedness section is particularly well-researched and presented in a way that's easy for anyone to understand and act upon.",
+		description: "I’ve worked in disaster response for many years, and this platform is very reliable. The wildfire section is clear and easy to follow.",
 		avatar: "https://randomuser.me/api/portraits/men/12.jpg",
 	},
 	{
 		name: "Emma Rodriguez",
-		description: "We've implemented this platform across our school district for disaster education. The interactive elements keep students engaged while teaching critical life-saving skills. The flood response training has been invaluable for our coastal community.",
+		description: "We use this platform in our schools to teach disaster safety. Students enjoy it, and the flood training has been very helpful for our area.",
 		avatar: "https://randomuser.me/api/portraits/women/13.jpg",
 	},
 	{
 		name: "David Kim",
-		description: "The real-time alert system and emergency checklists have been game-changers for our neighborhood watch program. The heatwave safety tips helped us protect vulnerable community members during last summer's record temperatures.",
+		description: "The alerts and emergency checklists helped our neighborhood stay safe. The heatwave tips were especially useful last summer.",
 		avatar: "https://randomuser.me/api/portraits/men/13.jpg",
 	},
 	{
 		name: "Sarah Johnson",
-		description: "This platform has transformed how we teach disaster readiness. The interactive quizzes and real-time alerts have made our community more prepared than ever before. The earthquake safety module alone has helped hundreds of families create effective emergency plans.",
+		description: "This platform made disaster learning simple and effective. Our community feels much more ready now.",
 		avatar: "https://randomuser.me/api/portraits/women/12.jpg",
 	},
 	{
 		name: "Dr. Michael Chen",
-		description: "As someone who has worked in disaster response for 15 years, I'm impressed by how comprehensive and accurate the information is. The wildfire preparedness section is particularly well-researched and presented in a way that's easy for anyone to understand and act upon.",
+		description: "The information here is accurate and easy to understand. It’s a great resource for anyone preparing for emergencies.",
 		avatar: "https://randomuser.me/api/portraits/men/12.jpg",
 	},
 	{
 		name: "Emma Rodriguez",
-		description: "We've implemented this platform across our school district for disaster education. The interactive elements keep students engaged while teaching critical life-saving skills. The flood response training has been invaluable for our coastal community.",
+		description: "It’s a great tool for teaching kids important safety skills. The lessons are engaging and practical.",
 		avatar: "https://randomuser.me/api/portraits/women/13.jpg",
 	},
 	{
 		name: "David Kim",
-		description: "The real-time alert system and emergency checklists have been game-changers for our neighborhood watch program. The heatwave safety tips helped us protect vulnerable community members during last summer's record temperatures.",
+		description: "This platform helped us support elderly neighbors during extreme heat. Very useful and easy to use.",
 		avatar: "https://randomuser.me/api/portraits/men/13.jpg",
 	},
-	// New testimonials
 	{
 		name: "Dr. Lisa Wong",
-		description: "As an emergency room physician, I've seen the difference preparedness makes. This platform's clear, actionable advice has helped our hospital staff and patients be better prepared for disasters. The emergency kit checklist is now our gold standard.",
+		description: "As a doctor, I see how important preparation is. The emergency kit checklist is simple and very helpful.",
 		avatar: "https://randomuser.me/api/portraits/women/14.jpg",
 	},
 	{
 		name: "Carlos Mendez",
-		description: "The hurricane preparedness guide saved our family's home. We followed the platform's recommendations for securing our property and creating an evacuation plan. When the storm hit, we were ready and stayed safe throughout.",
+		description: "The hurricane guide helped my family stay safe. We knew exactly what to do when the storm arrived.",
 		avatar: "https://randomuser.me/api/portraits/men/14.jpg",
 	},
 	{
 		name: "Nina Patel",
-		description: "I never realized how unprepared I was until I took the disaster readiness quiz. The personalized action plan it generated helped me create a comprehensive emergency kit and evacuation strategy for my family. The peace of mind is priceless.",
+		description: "The readiness quiz opened my eyes. It helped me create a simple emergency plan for my family.",
 		avatar: "https://randomuser.me/api/portraits/women/15.jpg",
 	},
 	{
 		name: "James Wilson",
-		description: "As a scout leader, I use this platform to teach essential survival skills to our troop. The first aid tutorials and emergency response guides are clear, practical, and potentially life-saving. Highly recommended for any community group!",
+		description: "I use this platform to teach survival skills. The first aid guides are clear and easy to understand.",
 		avatar: "https://randomuser.me/api/portraits/men/15.jpg",
 	},
 	{
 		name: "Aisha Bah",
-		description: "The platform's wildfire evacuation routes and real-time alert system helped our community evacuate safely during last season's fires. The step-by-step guides made it easy for everyone to understand what to do, even in stressful situations.",
+		description: "During wildfires, the alerts and evacuation guides helped our community stay safe and calm.",
 		avatar: "https://randomuser.me/api/portraits/women/16.jpg",
 	},
 	{
 		name: "Robert Zhang",
-		description: "I'm a civil defense volunteer, and this has become our go-to resource for community training. The disaster simulation exercises are incredibly realistic and have significantly improved our response times in emergency drills.",
+		description: "This is our main training resource for community drills. The simulations feel real and useful.",
 		avatar: "https://randomuser.me/api/portraits/men/16.jpg",
 	},
 	{
 		name: "Maria Garcia",
-		description: "After experiencing an earthquake with my children, I was determined to be better prepared. This platform's family emergency plan builder is comprehensive yet simple to follow. We now have a clear plan for any disaster scenario.",
+		description: "After an earthquake, this platform helped my family create a clear emergency plan we trust.",
 		avatar: "https://randomuser.me/api/portraits/women/17.jpg",
 	},
 	{
 		name: "Thomas Okafor",
-		description: "The platform's mobile app with offline access to emergency procedures was a lifesaver during the recent power outages. Even without internet, we had access to critical information when we needed it most.",
+		description: "Offline access helped us during power cuts. We could still read emergency steps when needed.",
 		avatar: "https://randomuser.me/api/portraits/men/17.jpg",
 	}
-
 ];
+
 
 type TestimonialProps = (typeof testimonials)[number];
 
@@ -121,7 +120,7 @@ const TestimonialItem = ({
 							<div
 								key={indx}
 								className={cn(
-									"flex flex-col justify-between h-[300px] rounded-xl border border-black/10 shrink-0 grow-0 w-[450px] bg-white dark:bg-zinc-950 dark:border-white/10 shadow-sm transition-all hover:shadow-md",
+									"flex flex-col justify-between h-[200px] rounded-xl border border-black/10 shrink-0 grow-0 w-[300px] bg-white dark:bg-zinc-950 dark:border-white/10 shadow-sm transition-all hover:shadow-md",
 								)}
 							>
 								<div className="flex-1 overflow-hidden">
