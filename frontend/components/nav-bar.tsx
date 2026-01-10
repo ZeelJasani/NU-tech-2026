@@ -24,7 +24,7 @@ export const navMenu = [
 	},
 	{
 		name: "Quiz",
-		path: "/Quiz",
+		path: "/quiz",
 	},
 	{
 		name: "SOS",
