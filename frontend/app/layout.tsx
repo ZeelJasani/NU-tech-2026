@@ -3,6 +3,7 @@ import { GeistSans } from 'geist/font/sans';
 import { Navbar } from "@/components/nav-bar";
 import { NavbarProvider } from "@/components/nav-mobile";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthSync } from "@/components/auth-sync";
 import { Toaster } from "@/components/ui/sonner";
 import { baseUrl, createMetadata } from "@/lib/metadata";
 import "./globals.css";
@@ -66,6 +67,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           >
             <NavbarProvider>
               <Navbar />
+              <AuthSync />
               {children}
               <Toaster
                 toastOptions={{

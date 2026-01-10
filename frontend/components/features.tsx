@@ -140,7 +140,7 @@ export default function Features({ stars }: { stars: string | null }) {
 								</p>
 							</div>
 							<p className="max-w-md mx-auto mt-4 text-4xl font-normal tracking-tighter text-center md:text-4xl">
-								<strong>Master disaster readiness with confidence today!</strong>
+								<strong>Master disaster readiness with confidence today</strong>
 							</p>
 							<Ripple />
 						</div>

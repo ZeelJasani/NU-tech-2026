@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { clerkMiddleware, requireAuth } from '@clerk/express';
 
+import userRoutes from './routes/user.routes';
+
 dotenv.config();
 
 const app = express();
@@ -13,9 +15,11 @@ app.use(cors());
 app.use(express.json());
 app.use(clerkMiddleware());
 
+app.use('/api/users', userRoutes);
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI as string)
-    .then(() => console.log('MongoDB connected'))
+    .then(() => console.log('MongoDB connected 🫡✨'))
     .catch(err => console.error('MongoDB connection error:', err));
 
 app.get('/', (req: Request, res: Response) => {
