@@ -10,6 +10,7 @@ import {
 	WavesIcon,
 	WindIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Testimonial } from "./landing/testimonials";
 import { Ripple } from "./ripple";
@@ -17,6 +18,7 @@ import { Ripple } from "./ripple";
 const features = [
 	{
 		id: 1,
+		slug: "earthquakes",
 		label: "Earthquakes",
 		title: "Sudden, violent <strong>ground shaking</strong>.",
 		description:
@@ -25,6 +27,7 @@ const features = [
 	},
 	{
 		id: 2,
+		slug: "floods",
 		label: "Floods",
 		title: "Overwhelming <strong>overflow of water</strong>.",
 		description:
@@ -33,6 +36,7 @@ const features = [
 	},
 	{
 		id: 3,
+		slug: "wildfires",
 		label: "Wildfires",
 		title: "Uncontrolled <strong>vegetation fires</strong>.",
 		description:
@@ -41,6 +45,7 @@ const features = [
 	},
 	{
 		id: 4,
+		slug: "cyclones",
 		label: "Cyclones",
 		title: "Powerful <strong>rotating storm</strong> systems.",
 		description:
@@ -49,6 +54,7 @@ const features = [
 	},
 	{
 		id: 5,
+		slug: "landslides",
 		label: "Landslides",
 		title: "Movement of <strong>rock and debris</strong>.",
 		description:
@@ -57,6 +63,7 @@ const features = [
 	},
 	{
 		id: 6,
+		slug: "heatwaves",
 		label: "Heatwaves",
 		title: "Extended periods of <strong>excessive heat</strong>.",
 		description:
@@ -103,12 +110,11 @@ export default function Features({ stars }: { stars: string | null }) {
 									{feature.description}
 								</p>
 							</div>
-							<a
+							<Link
 								className="mt-8 flex items-center text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wide hover:opacity-70 transition-opacity"
-								href="/docs"
-								target="_blank"
+								href={`/about/${feature.slug}`}
 							>
-								Start Learning
+								Read More
 								<svg
 									className="ml-2 w-4 h-4"
 									fill="none"
@@ -123,7 +129,7 @@ export default function Features({ stars }: { stars: string | null }) {
 										d="M17 8l4 4m0 0l-4 4m4-4H3"
 									/>
 								</svg>
-							</a>
+							</Link>
 						</div>
 					))}
 				</div>

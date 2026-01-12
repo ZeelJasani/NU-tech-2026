@@ -17,9 +17,9 @@ export default function PublicAlertsPage() {
                 </Button>
             </div>
 
-            <div className="text-center space-y-8 animate-in fade-in zoom-in duration-700">
+            <div className="text-center space-y-8">
                 <div className="inline-flex items-center justify-center p-8 rounded-full bg-primary/5 text-primary mb-4 ring-1 ring-primary/20">
-                    <Bell className="h-16 w-16 animate-pulse" />
+                    <Bell className="h-16 w-16" />
                 </div>
 
                 <div className="space-y-4">

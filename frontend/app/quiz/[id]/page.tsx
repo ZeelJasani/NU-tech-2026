@@ -3,35 +3,23 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Trophy, RotateCcw, Loader2, AlertTriangle, History } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Trophy, RotateCcw, Loader2, History } from "lucide-react";
 import Link from "next/link";
-import { Quiz } from "@/types";
+import { Quiz, QuizAttempt } from "@/types";
 import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 
 export default function QuizPage() {
     const params = useParams();
     const router = useRouter();
     const quizId = params.id as string;
-    const { getToken, userId } = useAuth();
+    const { getToken } = useAuth();
 
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [loading, setLoading] = useState(true);
     const [checkingHistory, setCheckingHistory] = useState(true);
-    const [previousAttempt, setPreviousAttempt] = useState<any>(null);
+    const [previousAttempt, setPreviousAttempt] = useState<QuizAttempt | null>(null);
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -39,20 +27,19 @@ export default function QuizPage() {
     const [score, setScore] = useState(0);
     const [showResult, setShowResult] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [hasStarted, setHasStarted] = useState(false);
 
     useEffect(() => {
         const fetchQuizAndHistory = async () => {
             try {
                 const token = await getToken();
 
-                // Fetch Quiz Data
                 const quizRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/quizzes/${quizId}`);
                 if (quizRes.ok) {
                     const data = await quizRes.json();
                     setQuiz(data);
                 }
 
-                // Check for previous attempts if user is logged in
                 if (token) {
                     const historyRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/quizzes/${quizId}/attempts`, {
                         headers: { Authorization: `Bearer ${token}` }
@@ -60,7 +47,7 @@ export default function QuizPage() {
                     if (historyRes.ok) {
                         const history = await historyRes.json();
                         if (history && history.length > 0) {
-                            setPreviousAttempt(history[0]); // Get most recent attempt
+                            setPreviousAttempt(history[0]);
                         }
                     }
                 }
@@ -77,17 +64,16 @@ export default function QuizPage() {
         }
     }, [quizId, getToken]);
 
-    // Warn on tab close/refresh if quiz is in progress
     useEffect(() => {
         const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-            if (!showResult && !previousAttempt && !loading && currentQuestionIndex > 0) {
+            if (hasStarted && !showResult && !loading && currentQuestionIndex >= 0) {
                 e.preventDefault();
                 e.returnValue = '';
             }
         };
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [showResult, previousAttempt, loading, currentQuestionIndex]);
+    }, [showResult, loading, currentQuestionIndex, hasStarted]);
 
     const handleOptionSelect = (index: number) => {
         if (isAnswered) return;
@@ -154,15 +140,20 @@ export default function QuizPage() {
         setIsAnswered(false);
         setScore(0);
         setShowResult(false);
+        setHasStarted(true);
     };
 
     const handleExit = () => {
         router.push('/quiz');
     };
 
+    const handleStart = () => {
+        setHasStarted(true);
+    };
+
     if (loading || checkingHistory) {
         return (
-            <div className="flex h-screen items-center justify-center">
+            <div className="flex h-screen items-center justify-center bg-background">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         );
@@ -170,46 +161,63 @@ export default function QuizPage() {
 
     if (!quiz) {
         return (
-            <div className="container mx-auto py-24 text-center">
+            <div className="container mx-auto py-24 text-center bg-background text-foreground min-h-screen">
                 <h1 className="text-2xl font-bold mb-4">Quiz not found</h1>
-                <Button asChild>
+                <Button variant="outline" asChild>
                     <Link href="/quiz">Return to Quizzes</Link>
                 </Button>
             </div>
         );
     }
 
-    // View: Already Attempted
-    if (previousAttempt && !showResult) {
+    // View: Preview / Already Attempted Unified (Simplified)
+    if (!hasStarted && !showResult) {
         return (
-            <div className="container mx-auto py-12 px-4 flex items-center justify-center min-h-[80vh]">
-                <Card className="w-full max-w-md text-center p-6 border-muted/60 bg-zinc-900/50 backdrop-blur-sm">
-                    <CardHeader>
-                        <div className="mx-auto bg-yellow-500/10 p-4 rounded-full mb-4">
-                            <History className="h-12 w-12 text-yellow-500" />
-                        </div>
-                        <CardTitle className="text-2xl font-bold mb-2">You already given this quiz</CardTitle>
-                        <p className="text-muted-foreground">
-                            You completed this quiz on {new Date(previousAttempt.completedAt).toLocaleDateString()}.
-                        </p>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="text-4xl font-black text-white mb-2">
-                            {previousAttempt.score} / {previousAttempt.totalQuestions}
-                        </div>
-                        <p className="text-sm text-zinc-500">
-                            Do you want to improve your score?
-                        </p>
-                    </CardContent>
-                    <CardFooter className="flex flex-col gap-3">
-                        <Button onClick={handleRetake} className="w-full" size="lg">
-                            Take Quiz Again
-                        </Button>
-                        <Button variant="outline" className="w-full" asChild>
-                            <Link href="/quiz">Back to Quizzes</Link>
-                        </Button>
-                    </CardFooter>
-                </Card>
+            <div className="container mx-auto py-24 px-4 flex flex-col items-center justify-center min-h-[90vh] text-center max-w-2xl">
+                {previousAttempt && (
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-muted border border-border text-muted-foreground text-xs font-medium mb-6">
+                        <History className="h-3.5 w-3.5" />
+                        <span>Last attempt: {new Date(previousAttempt.completedAt).toLocaleDateString()}</span>
+                    </div>
+                )}
+
+                <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
+                    {quiz.title}
+                </h1>
+
+                <p className="text-muted-foreground text-lg mb-10 leading-relaxed">
+                    {quiz.description}
+                </p>
+
+                <div className="flex items-center justify-center gap-8 mb-12 py-6 border-y border-border w-full max-w-md">
+                    <div className="flex flex-col items-center gap-1">
+                        <span className="text-xs uppercase tracking-widest text-muted-foreground/60 font-semibold">Questions</span>
+                        <span className="text-xl font-bold text-foreground">{quiz.questions.length}</span>
+                    </div>
+                    <div className="w-px h-8 bg-border" />
+                    <div className="flex flex-col items-center gap-1">
+                        <span className="text-xs uppercase tracking-widest text-muted-foreground/60 font-semibold">Duration</span>
+                        <span className="text-xl font-bold text-foreground">~5 min</span>
+                    </div>
+                    {previousAttempt && (
+                        <>
+                            <div className="w-px h-8 bg-border" />
+                            <div className="flex flex-col items-center gap-1">
+                                <span className="text-xs uppercase tracking-widest text-muted-foreground/60 font-semibold">Best Score</span>
+                                <span className="text-xl font-bold text-emerald-500">{previousAttempt.score}/{previousAttempt.totalQuestions}</span>
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                    <Button onClick={previousAttempt ? handleRetake : handleStart} size="lg" className="h-12 px-10 font-bold transition-all">
+                        {previousAttempt ? "Retake Quiz" : "Start Assessment"}
+                    </Button>
+                    <Button variant="outline" size="lg" className="h-12 px-10 font-bold transition-all" asChild>
+                        <Link href="/quiz">Cancel</Link>
+                    </Button>
+                </div>
             </div>
         );
     }
@@ -217,144 +225,118 @@ export default function QuizPage() {
     // View: Results
     if (showResult) {
         return (
-            <div className="container mx-auto py-12 px-4 flex items-center justify-center min-h-[80vh]">
-                <Card className="w-full max-w-md text-center p-6 border-muted/60 bg-zinc-900/50 backdrop-blur-sm">
-                    <CardHeader>
-                        <div className="mx-auto bg-primary/10 p-4 rounded-full mb-4">
-                            <Trophy className="h-12 w-12 text-primary" />
+            <div className="container mx-auto py-12 px-4 flex items-center justify-center min-h-[90vh]">
+                <div className="w-full max-w-lg text-center p-12 rounded-2xl border border-border bg-card shadow-sm">
+                    <div className="mx-auto w-16 h-16 bg-muted flex items-center justify-center rounded-full mb-8 border border-border">
+                        <Trophy className="h-8 w-8 text-foreground" />
+                    </div>
+                    <h2 className="text-3xl font-bold text-foreground mb-2">Assessment Complete</h2>
+                    <p className="text-muted-foreground mb-8">
+                        You&apos;ve finished {quiz.title}
+                    </p>
+
+                    <div className="flex flex-col gap-2 mb-10">
+                        <div className="text-6xl font-bold text-foreground tracking-tight">
+                            {score} / {quiz.questions.length}
                         </div>
-                        <CardTitle className="text-3xl font-bold mb-2">Quiz Completed!</CardTitle>
-                        <p className="text-muted-foreground">
-                            You scored {score} out of {quiz.questions.length}
-                        </p>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="text-6xl font-black text-primary mb-6">
-                            {Math.round((score / quiz.questions.length) * 100)}%
-                        </div>
-                        <p className="text-sm text-zinc-400">
-                            {score === quiz.questions.length
-                                ? "Perfect score! You are a disaster preparedness expert."
-                                : score > quiz.questions.length / 2
-                                    ? "Great job! You know your stuff."
-                                    : "Keep learning! Review the materials and try again."}
-                        </p>
-                    </CardContent>
-                    <CardFooter className="flex flex-col gap-3">
-                        <Button onClick={handleRetake} className="w-full" size="lg">
+                        <div className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Final Score</div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <Button onClick={handleRetake} size="lg" className="flex-1">
                             <RotateCcw className="mr-2 h-4 w-4" /> Try Again
                         </Button>
-                        <Button variant="outline" className="w-full" asChild>
-                            <Link href="/quiz">Back to Quizzes</Link>
+                        <Button variant="outline" onClick={handleExit} size="lg" className="flex-1">
+                            Exit to Quizzes
                         </Button>
-                    </CardFooter>
-                </Card>
+                    </div>
+                </div>
             </div>
         );
     }
 
-    // View: Taking Quiz
+    // View: Taking Quiz (Minimalist Redesign)
     const currentQuestion = quiz.questions[currentQuestionIndex];
     if (!currentQuestion) return null;
 
     const totalQuestions = quiz.questions.length;
-    const progress = ((currentQuestionIndex) / totalQuestions) * 100;
+    const progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
 
     return (
-        <div className="container mx-auto py-12 px-4 md:px-6 lg:px-8 max-w-4xl min-h-[85vh] flex flex-col justify-center">
-            {/* Back & Progress Header */}
-            <div className="mb-10 space-y-6">
-                <div className="flex items-center justify-between">
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="ghost" className="pl-0 hover:bg-transparent hover:text-red-500 transition-colors text-muted-foreground">
-                                <ArrowLeft className="h-4 w-4 mr-2" />
-                                <span className="font-medium">Exit Quiz</span>
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-zinc-900 border-zinc-800">
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you really want to exit quiz?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    If you exit now, your progress will not be saved.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel className="border-zinc-700">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleExit} className="bg-red-600 hover:bg-red-700">Exit Quiz</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-
-                    <div className="text-sm font-medium text-muted-foreground">
-                        Question <span className="text-foreground">{currentQuestionIndex + 1}</span> / {totalQuestions}
-                    </div>
-                </div>
-                <div className="space-y-2">
-                    <Progress value={progress} className="h-2 w-full bg-secondary" />
-                    <div className="flex justify-end">
-                        <span className="text-xs text-muted-foreground">{Math.round(progress)}% completed</span>
-                    </div>
+        <div className="container mx-auto py-8 px-4 max-w-3xl min-h-[90vh] flex flex-col">
+            {/* Minimal Header */}
+            <div className="flex items-center justify-between mb-12">
+                <Button variant="ghost" onClick={handleExit} className="text-muted-foreground hover:text-foreground hover:bg-transparent p-0 flex items-center gap-2 transition-colors">
+                    <ArrowLeft className="h-4 w-4" />
+                    <span className="text-sm font-medium">Exit</span>
+                </Button>
+                <div className="flex flex-col items-end gap-1">
+                    <span className="text-xs uppercase tracking-tighter text-muted-foreground font-bold">
+                        Question {currentQuestionIndex + 1} of {totalQuestions}
+                    </span>
+                    <Progress value={progress} className="h-1 w-32 bg-muted" />
                 </div>
             </div>
 
-            {/* Question Card */}
-            <Card className="border-0 shadow-2xl bg-card/60 backdrop-blur-xl ring-1 ring-white/5 overflow-hidden rounded-2xl">
-                <CardHeader className="py-10 px-8 md:px-12 text-center border-b border-white/5 bg-zinc-900/40">
-                    <CardTitle className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight tracking-tight text-white mb-2">
-                        {currentQuestion.question}
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="p-8 md:p-12 space-y-6 bg-zinc-900/20">
-                    <div className="grid gap-4 md:gap-5">
-                        {currentQuestion.options.map((option, index) => {
-                            let optionClass = "relative flex items-center justify-between w-full p-4 md:p-6 text-left text-base md:text-lg font-medium border-2 rounded-xl transition-all duration-200 outline-none";
+            <div className="flex-1 flex flex-col justify-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-16 leading-tight max-w-2xl">
+                    {currentQuestion.question}
+                </h2>
 
-                            if (isAnswered) {
-                                if (index === currentQuestion.correctAnswer) {
-                                    optionClass += " bg-emerald-500/10 border-emerald-500/50 text-emerald-400 opacity-100 z-10";
-                                } else if (index === selectedOption) {
-                                    optionClass += " bg-red-500/10 border-red-500/50 text-red-400 opacity-50";
-                                } else {
-                                    optionClass += " border-muted/20 text-muted-foreground opacity-50 blur-[0.5px]";
-                                }
+                <div className="grid gap-3 mb-16">
+                    {currentQuestion.options.map((option, index) => {
+                        const isCorrect = index === currentQuestion.correctAnswer;
+                        const isSelected = selectedOption === index;
+
+                        const baseClass = "group relative w-full p-6 text-left text-lg font-medium rounded-xl border transition-all duration-200 outline-none";
+                        let borderClass = "border-border hover:border-foreground/20 bg-transparent text-muted-foreground hover:text-foreground";
+
+                        if (isAnswered) {
+                            if (isCorrect) {
+                                borderClass = "border-emerald-500/50 bg-emerald-500/5 text-emerald-600 dark:text-emerald-400";
+                            } else if (isSelected) {
+                                borderClass = "border-red-500/50 bg-red-500/5 text-red-600 dark:text-red-400";
                             } else {
-                                optionClass += selectedOption === index
-                                    ? " border-primary bg-primary/10 text-primary shadow-[0_0_0_1px_rgba(var(--primary),1)] z-10"
-                                    : " border-muted/30 hover:border-primary/50 hover:bg-zinc-800/50 text-zinc-300 hover:text-white";
+                                borderClass = "border-border opacity-50 text-muted-foreground";
                             }
+                        } else if (isSelected) {
+                            borderClass = "border-primary bg-primary/5 text-foreground ring-1 ring-primary/10";
+                        }
 
-                            return (
-                                <button
-                                    key={index}
-                                    className={optionClass}
-                                    onClick={() => handleOptionSelect(index)}
-                                    disabled={isAnswered}
-                                >
-                                    <span className="pr-8">{option}</span>
-                                    {isAnswered && index === currentQuestion.correctAnswer && (
-                                        <CheckCircle2 className="h-6 w-6 text-emerald-500 absolute right-4 md:right-6 animate-in zoom-in spin-in-12 duration-300" />
-                                    )}
-                                    {isAnswered && index === selectedOption && index !== currentQuestion.correctAnswer && (
-                                        <XCircle className="h-6 w-6 text-red-500 absolute right-4 md:right-6 animate-in zoom-in duration-300" />
-                                    )}
-                                </button>
-                            )
-                        })}
-                    </div>
-                </CardContent>
-                <CardFooter className="p-8 md:px-12 bg-zinc-950/30 flex items-center justify-between border-t border-white/5 h-24">
-                    <span className="text-sm text-zinc-500 hidden md:block">
+                        return (
+                            <button
+                                key={index}
+                                className={`${baseClass} ${borderClass}`}
+                                onClick={() => handleOptionSelect(index)}
+                                disabled={isAnswered}
+                            >
+                                <div className="flex items-center justify-between pointer-events-none">
+                                    <span>{option}</span>
+                                    {isAnswered && isCorrect && <CheckCircle2 className="h-5 w-5 text-emerald-500" />}
+                                    {isAnswered && isSelected && !isCorrect && <XCircle className="h-5 w-5 text-red-500" />}
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                <div className="flex items-center justify-between pt-8 border-t border-border">
+                    <div className="text-sm font-medium">
                         {isAnswered ? (
-                            selectedOption === currentQuestion.correctAnswer ? "Correct answer!" : "Incorrect answer."
-                        ) : "Select an option to continue"}
-                    </span>
+                            <span className={selectedOption === currentQuestion.correctAnswer ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}>
+                                {selectedOption === currentQuestion.correctAnswer ? "Correct" : "Incorrect"}
+                            </span>
+                        ) : (
+                            <span className="text-muted-foreground/60">Choose one to proceed</span>
+                        )}
+                    </div>
+
                     {!isAnswered ? (
                         <Button
                             onClick={handleCheckAnswer}
                             disabled={selectedOption === null}
                             size="lg"
-                            className="w-full md:w-auto px-8 py-6 text-lg font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all ml-auto"
+                            className="h-12 px-8 font-bold"
                         >
                             Check Answer
                         </Button>
@@ -362,18 +344,21 @@ export default function QuizPage() {
                         <Button
                             onClick={handleNext}
                             size="lg"
-                            className="w-full md:w-auto px-8 py-6 text-lg font-semibold animate-in slide-in-from-right-4 fade-in duration-300 ml-auto"
+                            className="h-12 px-8 font-bold"
                             disabled={submitting}
                         >
-                            <span className="mr-2">
-                                {submitting ? "Saving..." : (currentQuestionIndex < totalQuestions - 1 ? "Next Question" : "See Results")}
-                            </span>
-                            {!submitting && currentQuestionIndex < totalQuestions - 1 && <ArrowRight className="h-5 w-5" />}
-                            {submitting && <Loader2 className="h-5 w-5 animate-spin" />}
+                            {submitting ? (
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                            ) : (
+                                <>
+                                    <span>{currentQuestionIndex < totalQuestions - 1 ? "Next Question" : "Complete Quiz"}</span>
+                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                </>
+                            )}
                         </Button>
                     )}
-                </CardFooter>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 }

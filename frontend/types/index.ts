@@ -27,3 +27,12 @@ export interface Quiz {
     image: string;
     questions: Question[];
 }
+
+export interface QuizAttempt {
+    _id: string;
+    userId: string;
+    quizId: string;
+    score: number;
+    totalQuestions: number;
+    completedAt: string;
+}

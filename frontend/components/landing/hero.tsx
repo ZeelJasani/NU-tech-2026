@@ -17,7 +17,14 @@ export default function Hero() {
 	return (
 		<section className="relative w-full flex md:items-center md:justify-center bg-white/96 dark:bg-black antialiased min-h-[40rem] md:min-h-[50rem] lg:min-h-[40rem]">
 			{/* Spotlight Effect */}
-			<Spotlight fill="#a855f7" />
+			<Spotlight />
+
+
+			{/* <section className="relative w-full flex md:items-center md:justify-center bg-white/96 dark:bg-black/[0.96] antialiased min-h-[40rem] md:min-h-[50rem] lg:min-h-[40rem]"> */}
+			{/* Spotlight Effect */}
+			{/* <Spotlight /> */}
+
+
 
 			{/* Background Grid */}
 			<div className="absolute inset-0 left-5 right-5 lg:left-16 lg:right-14 xl:left-16 xl:right-14">
@@ -114,7 +121,7 @@ const tabs: { name: "security" | "features"; content: { icon: React.ReactNode; t
 	{
 		name: "features",
 		content: [
-			// { icon: <AlertCircle className="w-4 h-4 inline mr-2" />, text: "Key Features" },
+			// {icon: <AlertCircle className="w-4 h-4 inline mr-2" />, text: "Key Features" },
 			{ icon: <BookOpen className="w-4 h-4 inline mr-2" />, text: "Disaster Learning Hub" },
 			{ icon: <Brain className="w-4 h-4 inline mr-2" />, text: "Readiness Quizzes" },
 			{ icon: <AlertTriangle className="w-4 h-4 inline mr-2" />, text: "Emergency SOS System" },

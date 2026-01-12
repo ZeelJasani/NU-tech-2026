@@ -78,7 +78,7 @@ export const NavbarMobile = () => {
 			className={cn(
 				"fixed top-[50px] inset-x-0 transform-gpu z-[100] bg-background grid grid-rows-[0fr] duration-300 transition-all navbar:hidden",
 				isOpen &&
-					"shadow-lg border-b border-[rgba(255,255,255,.1)] grid-rows-[1fr]",
+				"shadow-lg border-b border-[rgba(255,255,255,.1)] grid-rows-[1fr]",
 			)}
 		>
 			<div
@@ -181,10 +181,10 @@ function DocsNavBarContent() {
 											// Add border only when not last item
 											// and next item is not a group header
 											index === menu.list.length - 1 ||
-											menu.list[index + 1]?.group
+												menu.list[index + 1]?.group
 												? "border-none"
 												: "border-b"
-										}`}
+											}`}
 										onClick={toggleNavbar}
 									>
 										<div className="flex items-center gap-2">
@@ -210,33 +210,36 @@ export const navMenu: {
 		path: string;
 	}[];
 }[] = [
-	{
-		name: "hello_",
-		path: "/",
-	},
-
-	{
-		name: "docs",
-		path: "/docs",
-	},
-	{
-		name: "examples",
-		path: "/docs/examples/next-js",
-	},
-	{
-		name: "changelogs",
-		path: "/changelogs",
-	},
-	{
-		name: "blogs",
-		path: "/blog",
-	},
-	{
-		name: "community",
-		path: "/community",
-	},
-	{
-		name: "enterprise",
-		path: "/enterprise",
-	},
-];
+		{
+			name: "Home",
+			path: "/",
+		},
+		{
+			name: "Learn",
+			path: "/learn",
+		},
+		{
+			name: "Quiz",
+			path: "/quiz",
+		},
+		{
+			name: "SOS",
+			path: "/sos",
+		},
+		{
+			name: "Alerts",
+			path: "/alerts",
+		},
+		{
+			name: "About",
+			path: "/about/earthquakes",
+			child: [
+				{ name: "Earthquakes", path: "/about/earthquakes" },
+				{ name: "Floods", path: "/about/floods" },
+				{ name: "Wildfires", path: "/about/wildfires" },
+				{ name: "Cyclones", path: "/about/cyclones" },
+				{ name: "Landslides", path: "/about/landslides" },
+				{ name: "Heatwaves", path: "/about/heatwaves" },
+			],
+		},
+	];
